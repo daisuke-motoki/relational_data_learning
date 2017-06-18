@@ -1,0 +1,8 @@
+*.swp
+*.png
+*.pkl
+*.pyc
+*.ipynb
+
+__pycache__/
+data/
