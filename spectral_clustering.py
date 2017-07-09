@@ -91,7 +91,6 @@ def random_walk_normalized_spectral_clustering(X, k):
 
     D_inv = np.linalg.inv(D)
     L_rw = np.dot(D_inv, L)
-    import ipdb;ipdb.set_trace()
 
     eigen_value, eigen_vector = scipy.linalg.eigh(L_rw)
     positive = eigen_value >= 0
