@@ -3,7 +3,6 @@ import numpy as np
 from numpy import exp
 from scipy.special import loggamma
 from progressbar import ProgressBar
-from spectral_clustering import to_adjacency_matrix
 
 
 class StochasticBlockModel:
@@ -108,26 +107,6 @@ class StochasticBlockModel:
 
         return p_z
 
-        # M1 = np.sum(self.Z1, axis=0)
-        # M2 = np.sum(self.Z2, axis=0)
-        # n_pos = np.einsum("ikjl, ij", np.tensordot(self.Z1, self.Z2, axes=0), self.X)
-        # n_neg = np.einsum("ikjl, ij", np.tensordot(self.Z1, self.Z2, axes=0), 1 - self.X)
-        # m1_hat = lambda i: M1 - self.Z1[i]
-        # n_pos_hat = lambda i: n_pos - np.einsum("kjl, j", np.tensordot(self.Z1, self.Z2, axes=0)[i], self.X[i])
-        # n_neg_hat = lambda i: n_neg - np.einsum("kjl, j", np.tensordot(self.Z1, self.Z2, axes=0)[i], 1 - self.X[i])
-        # alpha_1_hat = lambda i: self.alpha_k + m1_hat(i)
-        # a_hat = lambda i: self.a0 + n_pos_hat(i)
-        # b_hat = lambda i: self.b0 + n_neg_hat(i)
-        # aihat = a_hat(index)
-        # bihat = b_hat(index)
-        #
-        # p_z1i_left = loggamma(aihat + bihat) - loggamma(aihat) - loggamma(bihat)
-        # p_z1i_right_upper = loggamma(aihat + np.dot(self.X[index], self.Z2)) + loggamma(bihat + np.dot((1 - self.X[index]), self.Z2))
-        # p_z1i_right_lower = loggamma(aihat + bihat + M2)
-        # p_z1i = alpha_1_hat(index) * (exp(p_z1i_left + p_z1i_right_upper - p_z1i_right_lower)).prod(axis=1)
-        # p_z1i = p_z1i.real
-        # p_z1i = p_z1i / p_z1i.sum()
-
     def _update(self, index, p_z, axis):
         """
         """
@@ -167,22 +146,10 @@ class StochasticBlockModel:
                 )
                 pickle.dump(data, open(results_file_name, "wb"))
 
-        return Z1_means, Z2_means
+        Z1_means = Z1_means.mean(axis=0)
+        Z2_means = Z2_means.mean(axis=0)
 
+        Z1_labels = Z1_means.argmax(axis=1)
+        Z2_labels = Z2_means.argmax(axis=1)
 
-if __name__ == "__main__":
-    import networkx as ntx
-    karate_graph = ntx.karate_club_graph()
-    karate_matrix = to_adjacency_matrix(karate_graph)
-    # karate_matrix = np.random.normal([[1]*6]*7)
-
-    n_cluster_row = 3
-    n_cluster_col = 3
-    sbm = StochasticBlockModel(karate_matrix,
-                               n_cluster_row,
-                               n_cluster_col)
-    sbm.initialize()
-    Z1_means, Z2_means = sbm.fit(burn_in=100,
-                                 n_sample=1000,
-                                 sample_step=10,
-                                 results_file="samples")
+        return Z1_labels, Z2_labels
