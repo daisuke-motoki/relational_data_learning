@@ -28,10 +28,10 @@ if __name__ == "__main__":
     sbm = StochasticBlockModel(email_data,
                                n_cluster_row,
                                n_cluster_col)
-    sbm.initialize()
+    sbm.initialize(seed=0)
     row_labels, col_labels = sbm.fit(burn_in=100,
                                      n_sample=200,
-                                     sample_step=10,
+                                     sample_step=1,
                                      results_file="samples")
     sort1_matrix, borders1 = sort_matrix(email_data,
                                          row_labels,

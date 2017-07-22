@@ -22,9 +22,11 @@ class StochasticBlockModel:
 
         self._is_ready = False
 
-    def initialize(self, trained_file=None):
+    def initialize(self, trained_file=None, seed=None):
         """
         """
+        if isinstance(seed, int):
+            np.random.seed(seed)
         if trained_file:
             pass
         else:
@@ -55,7 +57,7 @@ class StochasticBlockModel:
                 p_z2 = self._sampling(j, axis=1)
                 self._update(j, p_z2, axis=1)
             if isinstance(sample_step, int):
-                # reserve sample
+                # sample
                 if step % sample_step == 0:
                     sampled_Z1[int(step/sample_step)] = self.Z1
                     sampled_Z2[int(step/sample_step)] = self.Z2
