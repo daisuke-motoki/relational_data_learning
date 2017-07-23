@@ -20,8 +20,7 @@ if __name__ == "__main__":
     labels = denormalized_spectral_clustering(karate_matrix,
                                               n_clusters)
     new_karate_matrix, borders = sort_matrix(karate_matrix,
-                                             labels,
-                                             n_clusters)
+                                             labels)
     draw_matrix(new_karate_matrix, "denormalized.png",
                 borders, borders)
 
@@ -31,8 +30,7 @@ if __name__ == "__main__":
     labels = normalized_spectral_clustering(karate_matrix,
                                             n_clusters)
     new_karate_matrix, borders = sort_matrix(karate_matrix,
-                                             labels,
-                                             n_clusters)
+                                             labels)
     draw_matrix(new_karate_matrix, "normalized.png",
                 borders, borders)
 
@@ -42,7 +40,6 @@ if __name__ == "__main__":
     labels = random_walk_normalized_spectral_clustering(karate_matrix,
                                                         n_clusters)
     new_karate_matrix, borders = sort_matrix(karate_matrix,
-                                             labels,
-                                             n_clusters)
+                                             labels)
     draw_matrix(new_karate_matrix, "random_walk_normalized.png",
                 borders, borders)
