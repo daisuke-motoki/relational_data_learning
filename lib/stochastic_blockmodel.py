@@ -8,7 +8,8 @@ from progressbar import ProgressBar
 class StochasticBlockModel:
     """
     """
-    def __init__(self, X, n_cluster_row=None, n_cluster_col=None):
+    def __init__(self, X, n_cluster_row, n_cluster_col,
+                 a0=0.5, b0=0.5, mode="discrete"):
         self.X = X
         self.Xt = X.T
         self.N1, self.N2 = X.shape
@@ -17,9 +18,10 @@ class StochasticBlockModel:
 
         self.alpha_k = np.array([1/self.K]*self.K)
         self.alpha_l = np.array([1/self.L]*self.L)
-        self.a0 = 0.5
-        self.b0 = 0.5
+        self.a0 = a0
+        self.b0 = b0
 
+        self.mode = mode
         self._is_ready = False
 
     def initialize(self, trained_file=None, seed=None):
@@ -29,6 +31,16 @@ class StochasticBlockModel:
             np.random.seed(seed)
         if trained_file:
             pass
+        elif self.mode == "discrete":
+            Z1 = np.zeros((self.N1, self.K), dtype="float32")
+            assigned_indexes = np.random.randint(0, self.K, self.N1)
+            tmp_index = np.arange(self.N1)
+            Z1[tmp_index, assigned_indexes] = 1.
+
+            Z2 = np.zeros((self.N2, self.L), dtype="float32")
+            assigned_indexes = np.random.randint(0, self.L, self.N2)
+            tmp_index = np.arange(self.N2)
+            Z2[tmp_index, assigned_indexes] = 1.
         else:
             Z1 = np.zeros((self.N1, self.K))
             Z1[:, :] = np.random.dirichlet([1/self.K]*self.K)
@@ -112,12 +124,28 @@ class StochasticBlockModel:
     def _update(self, index, p_z, axis):
         """
         """
-        if axis == 0:
-            self.Z1[index] = p_z
-        elif axis == 1:
-            self.Z2[index] = p_z
+        if self.mode == "discrete":
+            if axis == 0:
+                p_z_tmp = p_z/p_z.sum()
+                choices = np.arange(self.K).tolist()
+                assigned_id = np.random.choice(choices, p=p_z_tmp)
+                self.Z1[index] = 0.
+                self.Z1[index][choices.index(assigned_id)] = 1.
+            elif axis == 1:
+                p_z_tmp = p_z/p_z.sum()
+                choices = np.arange(self.L).tolist()
+                assigned_id = np.random.choice(choices, p=p_z_tmp)
+                self.Z2[index] = 0.
+                self.Z2[index][choices.index(assigned_id)] = 1.
+            else:
+                raise ValueError("Wrong axis. Should be 0 or 1.")
         else:
-            raise ValueError("Wrong axis. Should be 0 or 1.")
+            if axis == 0:
+                self.Z1[index] = p_z
+            elif axis == 1:
+                self.Z2[index] = p_z
+            else:
+                raise ValueError("Wrong axis. Should be 0 or 1.")
 
     def fit(self, burn_in=None, epochs=1, n_sample=100, sample_step=1,
             results_file=None):
@@ -147,7 +175,6 @@ class StochasticBlockModel:
                     Z2_samples=sampled_Z2
                 )
                 pickle.dump(data, open(results_file_name, "wb"))
-
         Z1_means = Z1_means.mean(axis=0)
         Z2_means = Z2_means.mean(axis=0)
 

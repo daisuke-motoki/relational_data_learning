@@ -30,11 +30,12 @@ def draw_matrix(matrix, filename="tmp.png", borders_x=None, borders_y=None):
     plt.savefig(filename)
 
 
-def sort_matrix(matrix, labels, n_clusters, axis="xy"):
+def sort_matrix(matrix, labels, axis="xy"):
     indexes = np.array([], dtype="int")
     borders = list()
     border = 0
-    for i in range(n_clusters):
+    # for i in range(n_clusters):
+    for i in set(labels):
         tmp_ind = np.where(labels == i)[0]
         border += len(tmp_ind)
         borders.append(border)
